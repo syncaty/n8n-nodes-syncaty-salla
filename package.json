@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-syncaty-salla",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "n8n community node for Salla e-commerce via Syncaty SaaS - Manage multiple Salla stores with centralized OAuth2 token management",
   "license": "MIT",
   "homepage": "https://syncaty.com",
