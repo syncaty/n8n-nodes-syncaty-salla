@@ -59,6 +59,7 @@ export class SyncatySalla implements INodeType {
                     { name: 'Customer', value: 'customer' },
                     { name: 'Category', value: 'category' },
                     { name: 'Coupon', value: 'coupon' },
+                    { name: 'Segment', value: 'segment' },
                     { name: 'Shipment', value: 'shipment' },
                     { name: 'Store Info', value: 'store' },
                     { name: 'User Info', value: 'user' },
@@ -423,6 +424,59 @@ export class SyncatySalla implements INodeType {
                 ],
             },
 
+            // ==================== SEGMENT OPERATIONS ====================
+            {
+                displayName: 'Operation',
+                name: 'operation',
+                type: 'options',
+                noDataExpression: true,
+                displayOptions: {
+                    show: { resource: ['segment'] },
+                },
+                options: [
+                    { name: 'Get Many', value: 'getAll', description: 'Get all customer segments', action: 'Get many segments' },
+                    { name: 'Get Customers', value: 'getCustomers', description: 'Get customers in a segment with their metrics', action: 'Get segment customers' },
+                ],
+                default: 'getAll',
+            },
+            // Segment ID
+            {
+                displayName: 'Segment ID',
+                name: 'segmentId',
+                type: 'string',
+                default: '',
+                required: true,
+                displayOptions: {
+                    show: { resource: ['segment'], operation: ['getCustomers'] },
+                },
+                description: 'The ID of the segment (returned from Get Many operation)',
+            },
+            // Segment Customers Pagination
+            {
+                displayName: 'Return All',
+                name: 'returnAllSegmentCustomers',
+                type: 'boolean',
+                default: false,
+                description: 'Whether to return all customers or only up to a limit',
+                displayOptions: {
+                    show: { resource: ['segment'], operation: ['getCustomers'] },
+                },
+            },
+            {
+                displayName: 'Limit',
+                name: 'segmentCustomersLimit',
+                type: 'number',
+                default: 25,
+                description: 'Max number of customers to return',
+                typeOptions: {
+                    minValue: 1,
+                    maxValue: 100,
+                },
+                displayOptions: {
+                    show: { resource: ['segment'], operation: ['getCustomers'], returnAllSegmentCustomers: [false] },
+                },
+            },
+
             // ==================== SHIPMENT OPERATIONS ====================
             {
                 displayName: 'Operation',
@@ -705,6 +759,57 @@ export class SyncatySalla implements INodeType {
                     } else if (operation === 'delete') {
                         const couponId = this.getNodeParameter('couponId', i) as string;
                         responseData = await sallaApiRequest.call(this, 'DELETE', storeId, `/coupons/${couponId}`);
+                    }
+                }
+
+                // ==================== SEGMENT ====================
+                else if (resource === 'segment') {
+                    if (operation === 'getAll') {
+                        // Get all segments from Syncaty API
+                        responseData = await syncatyApiRequest.call(this, 'GET', `/n8n/stores/${storeId}/segments`);
+                        // Return the segments array
+                        responseData = responseData.segments || responseData;
+                    } else if (operation === 'getCustomers') {
+                        const segmentId = this.getNodeParameter('segmentId', i) as string;
+                        const returnAll = this.getNodeParameter('returnAllSegmentCustomers', i) as boolean;
+
+                        if (returnAll) {
+                            // Fetch all pages
+                            const allCustomers: any[] = [];
+                            let page = 1;
+                            const perPage = 50;
+
+                            do {
+                                const response = await syncatyApiRequest.call(
+                                    this,
+                                    'GET',
+                                    `/n8n/stores/${storeId}/segments/${segmentId}/customers`,
+                                    {},
+                                    { page, per_page: perPage }
+                                );
+
+                                if (response.customers && Array.isArray(response.customers)) {
+                                    allCustomers.push(...response.customers);
+                                }
+
+                                if (!response.pagination || page >= response.pagination.total_pages) {
+                                    break;
+                                }
+                                page++;
+                            } while (true);
+
+                            responseData = allCustomers;
+                        } else {
+                            const limit = this.getNodeParameter('segmentCustomersLimit', i) as number;
+                            const response = await syncatyApiRequest.call(
+                                this,
+                                'GET',
+                                `/n8n/stores/${storeId}/segments/${segmentId}/customers`,
+                                {},
+                                { page: 1, per_page: limit }
+                            );
+                            responseData = response.customers || response;
+                        }
                     }
                 }
 
