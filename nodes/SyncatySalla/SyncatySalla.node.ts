@@ -285,6 +285,7 @@ export class SyncatySalla implements INodeType {
                     { name: 'Create', value: 'create', description: 'Create a customer', action: 'Create a customer' },
                     { name: 'Get', value: 'get', description: 'Get a customer by ID', action: 'Get a customer' },
                     { name: 'Get Many', value: 'getAll', description: 'Get many customers', action: 'Get many customers' },
+                    { name: 'Get Metrics', value: 'getMetrics', description: 'Get customer metrics including segments, analytics, contact info and order stats', action: 'Get customer metrics' },
                     { name: 'Update', value: 'update', description: 'Update a customer', action: 'Update a customer' },
                     { name: 'Delete', value: 'delete', description: 'Delete a customer', action: 'Delete a customer' },
                 ],
@@ -298,8 +299,9 @@ export class SyncatySalla implements INodeType {
                 default: '',
                 required: true,
                 displayOptions: {
-                    show: { resource: ['customer'], operation: ['get', 'update', 'delete'] },
+                    show: { resource: ['customer'], operation: ['get', 'update', 'delete', 'getMetrics'] },
                 },
+                description: 'Salla Customer ID',
             },
             // Customer Fields
             {
@@ -649,6 +651,10 @@ export class SyncatySalla implements INodeType {
                     } else if (operation === 'delete') {
                         const customerId = this.getNodeParameter('customerId', i) as string;
                         responseData = await sallaApiRequest.call(this, 'DELETE', storeId, `/customers/${customerId}`);
+                    } else if (operation === 'getMetrics') {
+                        const customerId = this.getNodeParameter('customerId', i) as string;
+                        // Get metrics from Syncaty API (includes segments, analytics, contact info, order stats)
+                        responseData = await syncatyApiRequest.call(this, 'GET', `/n8n/stores/${storeId}/customers/${customerId}/metrics`);
                     }
                 }
 
