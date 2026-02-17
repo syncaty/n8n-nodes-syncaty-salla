@@ -9,7 +9,7 @@ import {
 export class SyncatySallaWebhook implements INodeType {
     description: INodeTypeDescription = {
         displayName: 'Syncaty Salla Webhook',
-        name: 'prosynaiSallaWebhook',
+        name: 'syncatySallaWebhook',
         icon: 'file:syncaty.svg',
         group: ['trigger'],
         version: 1,

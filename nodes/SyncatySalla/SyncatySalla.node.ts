@@ -17,12 +17,12 @@ import {
 export class SyncatySalla implements INodeType {
     description: INodeTypeDescription = {
         displayName: 'Syncaty Salla',
-        name: 'prosynaiSalla',
+        name: 'syncatySalla',
         icon: 'file:syncaty.svg',
         group: ['transform'],
         version: 1,
         subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-        description: 'Interact with Salla stores via Prosynai platform',
+        description: 'Interact with Salla stores via Syncaty platform',
         defaults: {
             name: 'Syncaty Salla',
         },

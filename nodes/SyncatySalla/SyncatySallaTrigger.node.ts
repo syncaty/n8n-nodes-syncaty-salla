@@ -13,12 +13,12 @@ import { syncatyApiRequest } from './GenericFunctions';
 export class SyncatySallaTrigger implements INodeType {
     description: INodeTypeDescription = {
         displayName: 'Syncaty Salla Trigger',
-        name: 'prosynaiSallaTrigger',
+        name: 'syncatySallaTrigger',
         icon: 'file:syncaty.svg',
         group: ['trigger'],
         version: 1,
         subtitle: '={{$parameter["event"]}}',
-        description: 'Receive Salla webhooks via Prosynai',
+        description: 'Receive Salla webhooks via Syncaty',
         defaults: {
             name: 'Syncaty Salla Trigger',
         },
@@ -118,7 +118,7 @@ export class SyncatySallaTrigger implements INodeType {
                 const storeId = this.getNodeParameter('storeId') as string;
                 const event = this.getNodeParameter('event') as string;
 
-                // Check if webhook already registered in Prosynai
+                // Check if webhook already registered in Syncaty
                 try {
                     const webhooks = await syncatyApiRequest.call(
                         this,
